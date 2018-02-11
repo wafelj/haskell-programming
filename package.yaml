@@ -15,20 +15,10 @@ description:         Please see the README on Github at <https://github.com/wafe
 
 dependencies:
 - base >= 4.7 && < 5
+- QuickCheck
 
 library:
   source-dirs: src
-
-executables:
-  haskell-programming-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - haskell-programming
 
 tests:
   haskell-programming-test:
