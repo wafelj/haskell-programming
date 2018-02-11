@@ -1,0 +1,42 @@
+name:                haskell-programming
+version:             0.1.0.0
+github:              "wafelj/haskell-programming"
+license:             BSD3
+author:              "Florjan Bartol"
+maintainer:          "florjan.bartol@gmail.com"
+copyright:           "2018 Florjan Bartol"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+synopsis:            My solutions to exercises in Haskell Programming by Christopher Allen and Julie Moronuki.
+description:         Please see the README on Github at <https://github.com/wafelj/haskell-programming#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+
+executables:
+  haskell-programming-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - haskell-programming
+
+tests:
+  haskell-programming-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - haskell-programming
