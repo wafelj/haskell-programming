@@ -1,2 +1,4 @@
+import Ch18_7_ChapterExercises_Test
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = test

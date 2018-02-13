@@ -16,6 +16,7 @@ description:         Please see the README on Github at <https://github.com/wafe
 dependencies:
 - base >= 4.7 && < 5
 - QuickCheck
+- checkers
 
 library:
   source-dirs: src
