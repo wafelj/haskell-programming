@@ -36,3 +36,50 @@ instance Monad (PhhhbbtttEither b) where
   return = pure
   PRight b >>= _ = PRight b
   PLeft a >>= f = f a
+
+--3
+newtype Identity a = Identity a
+  deriving (Eq, Ord, Show)
+
+instance Functor Identity where
+  fmap f (Identity a) = Identity $ f a
+
+instance Applicative Identity where
+  pure = Identity
+  Identity f <*> Identity a = Identity $ f a
+
+instance Monad Identity where
+  return = pure
+  Identity a >>= f = f a
+
+
+--4
+data List a =
+    Nil
+  | Cons a (List a)
+  deriving (Eq, Show)
+
+instance Functor List where
+  fmap _ Nil = Nil
+  fmap f (Cons a as) = Cons (f a) (fmap f as)
+
+instance Applicative List where
+  pure a = Cons a Nil
+  Nil <*> _ = Nil
+  _ <*> Nil = Nil
+  fs <*> as = flatten (fmap (\f -> fmap f as) fs)
+  
+flatten :: List (List a) -> List a
+flatten (Cons a as) = concat' a (flatten as)
+flatten _           = Nil
+
+concat' :: List a -> List a -> List a
+concat' Nil bs = bs
+concat' as Nil = as
+concat' (Cons a as) bs = 
+  Cons a (concat' as bs)
+
+instance Monad List where
+  return = pure
+  Nil >>= _ = Nil
+  l   >>= f = flatten $ fmap f l

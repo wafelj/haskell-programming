@@ -1,4 +1,5 @@
 .stack-work/
 haskell-programming.cabal
 *.swp
+*.swo
 *~
