@@ -4,6 +4,7 @@ import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
 
+-- Identity
 newtype Identity a = Identity a
   deriving (Eq, Ord, Show)
 
@@ -23,10 +24,33 @@ instance Arbitrary a => Arbitrary (Identity a) where
 
 instance Eq a => EqProp (Identity a) where (=-=) = eq
 
-type TI = Identity
+-- Constant
+newtype Constant a b = Constant { getConstant :: a }
+  deriving (Eq, Ord, Show)
+
+instance Functor (Constant a) where
+  fmap _ (Constant a) = Constant a
+
+instance Foldable (Constant a) where
+  foldMap _ _ = mempty
+
+instance Traversable (Constant a) where
+  traverse f (Constant a) = pure $ Constant a
+
+instance Arbitrary a => Arbitrary (Constant a b) where
+  arbitrary = do
+    a <- arbitrary
+    return $ Constant a
+
+instance (Eq a, Eq b) => EqProp (Constant a b) where (=-=) = eq
+
 
 main :: IO ()
 main = do
-  let trigger :: TI (Int, Int, [Int])
-      trigger = undefined
-  quickBatch (traversable trigger)
+  let triggerIdentity :: Identity (Int, Int, [Int])
+      triggerIdentity = undefined
+  quickBatch (traversable triggerIdentity)
+
+  let triggerConstant :: (Constant Int) (Int, Int, [Int])
+      triggerConstant = undefined
+  quickBatch (traversable triggerConstant)
