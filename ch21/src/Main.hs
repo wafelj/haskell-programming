@@ -45,6 +45,31 @@ instance Arbitrary a => Arbitrary (Constant a b) where
 instance (Eq a, Eq b) => EqProp (Constant a b) where (=-=) = eq
 
 
+-- Maybe
+data Optional a =
+    Nada
+  | Yep a
+  deriving (Eq, Ord, Show)
+
+instance Functor Optional where
+  fmap _ Nada = Nada
+  fmap f (Yep a) = Yep $ f a
+
+instance Foldable Optional where
+  foldMap _ Nada = mempty
+  foldMap f (Yep a) = f a
+
+instance Traversable Optional where
+  traverse _ Nada = pure Nada
+  traverse f (Yep a) = Yep <$> f a
+
+instance Arbitrary a => Arbitrary (Optional a) where
+  arbitrary = do
+    a <- arbitrary
+    elements [Nada, Yep a]
+
+instance (Eq a) => EqProp (Optional a) where (=-=) = eq
+
 main :: IO ()
 main = do
   let triggerIdentity :: Identity (Int, Int, [Int])
@@ -54,3 +79,7 @@ main = do
   let triggerConstant :: (Constant Int) (Int, Int, [Int])
       triggerConstant = undefined
   quickBatch (traversable triggerConstant)
+
+  let triggerOptional :: Optional (Int, Int, [Int])
+      triggerOptional = undefined
+  quickBatch (traversable triggerOptional)
