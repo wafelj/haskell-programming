@@ -3,6 +3,7 @@ module Main where
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes
+import Control.Applicative
 
 -- Identity
 newtype Identity a = Identity a
@@ -70,6 +71,35 @@ instance Arbitrary a => Arbitrary (Optional a) where
 
 instance (Eq a) => EqProp (Optional a) where (=-=) = eq
 
+
+-- List
+data List a =
+    Nil
+  | Cons a (List a)
+  deriving (Eq, Ord, Show)
+
+instance Functor List where
+  fmap _ Nil = Nil
+  fmap f (Cons a l) = Cons (f a) (fmap f l)
+
+instance Foldable List where
+  foldMap _ Nil = mempty
+  foldMap f (Cons a l) = f a `mappend` foldMap f l
+
+instance Traversable List where
+  traverse f = foldr consf $ pure Nil
+    where consf a b = liftA2 Cons (f a) b
+
+instance Arbitrary a => Arbitrary (List a) where
+  arbitrary = sized go
+    where go 0 = return Nil
+          go n = do
+            xs <- go $ n - 1
+            a  <- arbitrary
+            return $ Cons a xs
+
+instance (Eq a) => EqProp (List a) where (=-=) = eq
+
 main :: IO ()
 main = do
   let triggerIdentity :: Identity (Int, Int, [Int])
@@ -83,3 +113,7 @@ main = do
   let triggerOptional :: Optional (Int, Int, [Int])
       triggerOptional = undefined
   quickBatch (traversable triggerOptional)
+
+  let triggerList :: List (Int, Int, [Int])
+      triggerList = undefined
+  quickBatch (traversable triggerList)
