@@ -100,6 +100,57 @@ instance Arbitrary a => Arbitrary (List a) where
 
 instance (Eq a) => EqProp (List a) where (=-=) = eq
 
+
+-- Three
+data Three a b c =
+  Three a b c
+  deriving (Eq, Ord, Show)
+
+instance Functor (Three a b) where
+  fmap f (Three a b c) = Three a b $ f c
+
+instance Foldable (Three a b) where
+  foldMap f (Three a b c) = f c
+
+instance Traversable (Three a b) where
+  traverse f (Three a b c) = Three a b <$> f c
+
+instance ( Arbitrary a
+         , Arbitrary b
+         , Arbitrary c )
+        => Arbitrary (Three a b c) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    c <- arbitrary
+    return $ Three a b c
+
+instance (Eq a, Eq b, Eq c) => EqProp (Three a b c) where (=-=) = eq
+
+-- Pair
+data Pair a b =
+  Pair a b
+  deriving (Eq, Ord, Show)
+
+instance Functor (Pair a) where
+  fmap f (Pair a b) = Pair a $ f b
+
+instance Foldable (Pair a) where
+  foldMap f (Pair a b) = f b
+
+instance Traversable (Pair a) where
+  traverse f (Pair a b) = Pair a <$> f b
+
+instance ( Arbitrary a
+         , Arbitrary b )
+        => Arbitrary (Pair a b) where
+  arbitrary = do
+    a <- arbitrary
+    b <- arbitrary
+    return $ Pair a b
+
+instance (Eq a, Eq b) => EqProp (Pair a b) where (=-=) = eq
+
 main :: IO ()
 main = do
   let triggerIdentity :: Identity (Int, Int, [Int])
@@ -117,3 +168,11 @@ main = do
   let triggerList :: List (Int, Int, [Int])
       triggerList = undefined
   quickBatch (traversable triggerList)
+
+  let triggerThree :: (Three Int Int) (Int, Int, [Int])
+      triggerThree = undefined
+  quickBatch (traversable triggerThree)
+
+  let triggerPair :: (Pair Int) (Int, Int, [Int])
+      triggerPair = undefined
+  quickBatch (traversable triggerPair)
