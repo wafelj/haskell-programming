@@ -151,6 +151,32 @@ instance ( Arbitrary a
 
 instance (Eq a, Eq b) => EqProp (Pair a b) where (=-=) = eq
 
+-- Big
+data Big a b =
+  Big a b b
+  deriving (Eq, Ord, Show)
+
+instance Functor (Big a) where
+  fmap f (Big a b1 b2) = Big a (f b1) (f b2)
+
+instance Foldable (Big a) where
+  foldMap f (Big a b1 b2) = f b1 `mappend` f b2
+
+instance Traversable (Big a) where
+  traverse f (Big a b1 b2) = Big a <$> f b1 <*> f b2
+
+instance ( Arbitrary a
+         , Arbitrary b )
+        => Arbitrary (Big a b) where
+  arbitrary = do
+    a <- arbitrary
+    b1 <- arbitrary
+    b2 <- arbitrary
+    return $ Big a b1 b2
+
+instance (Eq a, Eq b) => EqProp (Big a b) where (=-=) = eq
+
+
 main :: IO ()
 main = do
   let triggerIdentity :: Identity (Int, Int, [Int])
@@ -176,3 +202,7 @@ main = do
   let triggerPair :: (Pair Int) (Int, Int, [Int])
       triggerPair = undefined
   quickBatch (traversable triggerPair)
+
+  let triggerBig :: (Big Int) (Int, Int, [Int])
+      triggerBig = undefined
+  quickBatch (traversable triggerBig)
