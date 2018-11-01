@@ -7,6 +7,14 @@ import System.Random
 import Data.Char (digitToInt)
 import Text.Read (readMaybe)
 
+data MorraState =
+  MorraState {
+    stateHistory :: History
+  , stateScores  :: Scores
+  }
+
+type History = [Int]
+
 data Scores = 
   Scores {
     scorePlayer :: Int
@@ -19,12 +27,14 @@ instance Show Scores where
     "\n  Player: " ++ show (scorePlayer s) ++ 
     "\n  AI: " ++ show (scoreAI s)
 
-gameRound :: StateT Scores IO ()
+gameRound :: StateT MorraState IO ()
 gameRound = do
   lift $ putStr "Enter 1 or 2: "
 
   playerFingers <- lift $ getPlayerFingers
-  aiFingers <- lift getAIFingers
+  aiFingers <- getAIFingers
+
+  addToHistory playerFingers
 
   if odd (playerFingers + aiFingers)
     then incrementScorePlayer >> (lift $ putStrLn " -- You win!")
@@ -42,28 +52,59 @@ getPlayerFingers = do
         Just f  -> return f
     else getPlayerFingers
 
-getAIFingers :: IO Int
-getAIFingers = getStdRandom $ randomR (1,2)
+getAIFingers :: StateT MorraState IO Int
+getAIFingers = do
+  state <- get
+  let history = stateHistory state
+  let lastTwo = take 2 history
+  if length lastTwo == 2
+    then lift $ predictNext history lastTwo
+    else lift getRandomFingers
 
-incrementScorePlayer :: StateT Scores IO ()
-incrementScorePlayer = modify $ \s -> Scores 
-  (scorePlayer s + 1) 
-  (scoreAI s)
+predictNext :: History -> [Int] -> IO Int
+predictNext      []  _ = getRandomFingers
+predictNext   (_:[]) _ = getRandomFingers
+predictNext (_:_:[]) _ = getRandomFingers
+predictNext (h1:h2:h3:hs) [l1, l2]
+  | (h2, h3) == (l1, l2) = return h1
+  | otherwise = predictNext (h2:h3:hs) [l1, l2]
 
-incrementScoreAI :: StateT Scores IO ()
-incrementScoreAI = modify $ \s -> Scores 
-  (scorePlayer s) 
-  (scoreAI s + 1)
+getRandomFingers :: IO Int
+getRandomFingers = getStdRandom $ randomR (1,2)
 
-game :: StateT Scores IO ()
+addToHistory :: Int -> StateT MorraState IO ()
+addToHistory n = modify $ \s ->
+  MorraState
+    (n : (stateHistory s))
+    (stateScores s)
+
+incrementScorePlayer :: StateT MorraState IO ()
+incrementScorePlayer = modify $ \s ->
+  let scores = stateScores s in
+  MorraState
+    (stateHistory s)
+    (Scores
+      (scorePlayer scores + 1)
+      (scoreAI scores))
+
+incrementScoreAI :: StateT MorraState IO ()
+incrementScoreAI = modify $ \s ->
+  let scores = stateScores s in
+  MorraState
+    (stateHistory s)
+    (Scores
+      (scorePlayer scores)
+      (scoreAI scores + 1))
+
+game :: StateT MorraState IO ()
 game = do
   lift $ putStr "How many rounds? "
   numRounds <- lift getNumRounds
   replicateM_ numRounds gameRound
 
-  scores <- get
-  lift $ putStrLn $ exitMessage scores
-  lift $ putStrLn $ show scores
+  state <- get
+  lift $ putStrLn $ congratsMessage $ stateScores state
+  lift $ putStrLn $ show $ stateScores state
 
 getNumRounds :: IO Int
 getNumRounds = do
@@ -73,8 +114,8 @@ getNumRounds = do
     Nothing -> getNumRounds
     Just n  -> return n
 
-exitMessage :: Scores -> String
-exitMessage scores = 
+congratsMessage :: Scores -> String
+congratsMessage scores = 
   "Victory goes to " ++ 
     (if scorePlayer scores > scoreAI scores 
       then "you" else "AI") ++ 
@@ -83,5 +124,5 @@ exitMessage scores =
 main :: IO ()
 main = do
   putStrLn "Welcome to Morra. You play odd."
-  runStateT game $ Scores 0 0
+  runStateT game $ MorraState [] $ Scores 0 0
   return ()
