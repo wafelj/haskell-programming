@@ -23,19 +23,8 @@ ghc-options: -Wall
 library:
   dependencies:
   - base
+  - deepseq
   source-dirs: library
-
-executables:
-  simple-queue:
-    source-dirs: executable
-    main: Main.hs
-    dependencies:
-    - base
-    - simple-queue
-    ghc-options:
-    - -rtsopts
-    - -threaded
-    - -with-rtsopts=-N
 
 benchmarks:
   simple-queue-benchmarks:
@@ -45,6 +34,7 @@ benchmarks:
     - base
     - simple-queue
     - criterion
+    - containers
     ghc-options:
     - -rtsopts
     - -threaded
