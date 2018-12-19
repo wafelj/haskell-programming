@@ -25,17 +25,37 @@ executable fingerd
   ghc-options:         -Wall
   hs-source-dirs:      src
   main-is:             Main.hs
+  other-modules:       User
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , bytestring
                      , network
-                     , raw-strings-qq
                      , sqlite-simple
                      , text
+                     , cassava >= 0.5.1.0
 
 executable importusers
   ghc-options:         -Wall
   hs-source-dirs:      src
   main-is:             ImportUsers.hs
+  other-modules:       User
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
+                     , sqlite-simple
+                     , cassava >= 0.5.1.0
+                     , vector
+                     , bytestring
+                     , text
+
+executable createdb
+  ghc-options:         -Wall
+  hs-source-dirs:      src
+  main-is:             CreateDatabase.hs
+  other-modules:       User
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , sqlite-simple
+                     , bytestring
+                     , cassava >= 0.5.1.0
+                     , raw-strings-qq
+                     , text
