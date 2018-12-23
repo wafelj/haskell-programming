@@ -3,3 +3,4 @@ haskell-programming.cabal
 *.swp
 *.swo
 *~
+.DS_Store

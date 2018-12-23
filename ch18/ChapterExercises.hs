@@ -1,4 +1,4 @@
-module Ch18_7_ChapterExercises where
+module ChapterExercises where
 
 -- 1
 data Nope a =

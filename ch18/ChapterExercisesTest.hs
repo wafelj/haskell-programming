@@ -1,6 +1,6 @@
-module Ch18_7_ChapterExercises_Test where
+module ChapterExercisesTest where
 
-import Ch18_7_ChapterExercises
+import ChapterExercises
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
 import Test.QuickCheck.Classes

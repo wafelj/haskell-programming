@@ -1,4 +1,4 @@
-module Ch20_5_LibraryFunctions where
+module LibraryFunctions where
 
 import Data.Monoid
 
