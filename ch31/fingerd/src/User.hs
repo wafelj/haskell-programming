@@ -1,22 +1,29 @@
-{-# LANGUAGE DeriveGeneric #-}
 module User where 
 
+import Control.Monad (mzero)
 import Database.SQLite.Simple
 import Data.Text (Text)
 import Data.Csv
-import GHC.Generics (Generic)
 
 data User =
   User {
-      userId   :: Integer
+      userId   :: Maybe Integer
     , username :: Text
     , shell :: Text
     , homeDirectory :: Text
     , realName :: Text
     , phone :: Text
-  } deriving (Eq, Show, Generic)
+  } deriving (Eq, Show)
 
-instance FromRecord User
+instance FromRecord User where
+  parseRecord v
+    | length v == 5 = User Nothing
+                        <$> v .! 0
+                        <*> v .! 1
+                        <*> v .! 2
+                        <*> v .! 3
+                        <*> v .! 4
+    | otherwise     = mzero
 
 instance FromRow User where
   fromRow = User <$> field
@@ -27,7 +34,7 @@ instance FromRow User where
                  <*> field
 
 instance ToRow User where
-  toRow (User id_ username shell homeDir
-              realName phone) =
-    toRow (id_, username, shell, homeDir,
-           realName, phone)
+  toRow (User id_ username_ shell_ homeDir_
+              realName_  phone_) =
+    toRow (id_, username_, shell_, homeDir_,
+           realName_, phone_)

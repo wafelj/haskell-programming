@@ -38,4 +38,4 @@ main = do
     Left error -> die error
     Right rows -> insertRows rows
 
-  -- TODO no ids, overwrite same username
+  -- TODO overwrite same username
