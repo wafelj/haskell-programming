@@ -14,7 +14,7 @@ import User
 
 insertUser :: Query
 insertUser =
-  "INSERT INTO users\
+  "INSERT OR REPLACE INTO users\
   \ VALUES (?, ?, ?, ?, ?, ?)"
 
 insertRows :: Vector User -> IO ()
@@ -35,7 +35,5 @@ main = do
   let parseResult = decode NoHeader rawData
 
   case parseResult of
-    Left error -> die error
+    Left err -> die err
     Right rows -> insertRows rows
-
-  -- TODO overwrite same username
